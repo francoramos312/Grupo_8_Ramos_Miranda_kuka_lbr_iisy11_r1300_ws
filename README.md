@@ -1,39 +1,33 @@
-# Cinemática Directa e Inversa - KUKA LBR iisy 11 R1300 (ROS 2)
+# Cinemática del Robot KUKA LBR iisy 11 R1300 (ROS 2)
 
-Este repositorio contiene los paquetes de ROS 2 para la simulación y cálculo de Cinemática Directa (FK) y Cinemática Inversa (IK) del robot industrial **KUKA LBR iisy 11 R1300**.
+## 1. Información General
+* **Proyecto:** Implementación, simulación y validación de los nodos de Cinemática Directa (FK) e Inversa (IK).
+* **Modelo del Robot:** KUKA LBR iisy 11 R1300 (6 DOF).
+* **Autores (Grupo 08):**
+  * Franco Joaquin Ramos Mamani
+  * Gustavo Miranda Espada
 
 ---
 
-## 📁 Estructura del Repositorio
+## 2. Software y Versiones Requeridas
+* **Sistema Operativo:** Ubuntu 24.04 LTS (Noble Numbat)
+* **Middleware ROS:** ROS 2 Jazzy Jalisco
+* **Lenguaje:** Python 3.12+ (con librerías `numpy`, `rclpy` y `setuptools`)
 
-```text
-Grupo_8_Ramos_Miranda_kuka_lbr_iisy11_r1300_ws/
-└── src/
-    ├── grupo08_kuka_iisy11_bringup/    # Archivos de launch y configuración RViz
-    │   └── launch/
-    │       └── display.launch.py
-    ├── grupo08_robot_kinematics/       # Nodos Python de cinemática
-    │   └── grupo08_robot_kinematics/
-    │       ├── __init__.py
-    │       ├── fk_node.py              # Nodo de Cinemática Directa
-    │       └── ik_node.py              # Nodo de Cinemática Inversa con animación suave
-    └── kuka_robot_descriptions/        # Descripciones y mallas URDF del robot
+---
 
-# Clonar repositorio
+## 3. Instalación y Configuración del Workspace
+El repositorio incluye scripts automatizados para la gestión de dependencias de sistema, paquetes del robot y la compilación del espacio de trabajo.
+
+### Clonación e Instalación:
+```bash
+# 1. Clonar el repositorio
 git clone [https://github.com/francoramos312/Grupo_8_Ramos_Miranda_kuka_lbr_iisy11_r1300_ws.git](https://github.com/francoramos312/Grupo_8_Ramos_Miranda_kuka_lbr_iisy11_r1300_ws.git)
 cd Grupo_8_Ramos_Miranda_kuka_lbr_iisy11_r1300_ws
 
-# Compilar los paquetes
-colcon build
-
-# Cargar el entorno
-source install/setup.bash
+# 2. Otorgar permisos e instalar dependencias
+chmod +x *.sh
+./instalar.sh
 
 
-ros2 launch grupo08_kuka_iisy11_bringup display.launch.py
-
-
-ros2 launch grupo08_kuka_iisy11_bringup display.launch.py
-
-
-ros2 run grupo08_robot_kinematics ik_node.py
+    
