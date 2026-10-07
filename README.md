@@ -52,6 +52,7 @@ ros2 run grupo08_robot_kinematics fk_node
 ```
 Resultado esperado:
 [Demostración RViz2](docs/captura_cinematicadirecta.png)
+
 3. Ejecutar el nodo de Cinemática Directa (Terminal 3):
 ```bash
 #Antes de ejecutar el sugundo nodo se debe cerrar el nodo de cinematica directa 
