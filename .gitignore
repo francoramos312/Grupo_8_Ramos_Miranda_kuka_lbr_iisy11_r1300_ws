@@ -1,15 +1,6 @@
-# Archivos de compilación de ROS 2
 build/
 install/
 log/
-
-# Archivos de entorno y temporales de Python
 *.pyc
 __pycache__/
-*.swp
-.DS_Store
-
-# Entornos virtuales e IDEs
-.venv/
 .vscode/
-.idea/
