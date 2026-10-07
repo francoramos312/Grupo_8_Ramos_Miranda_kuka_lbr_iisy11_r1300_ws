@@ -51,7 +51,7 @@ ros2 run grupo08_robot_kinematics fk_node
 
 ```
 Resultado esperado:
-[Demostración RViz2](docs/captura_cinematicadirecta.png)
+[Cinematica_Directa](docs/captura_cinematicadirecta.png)
 
 3. Ejecutar el nodo de Cinemática Directa (Terminal 3):
 ```bash
@@ -62,7 +62,7 @@ source install/setup.bash
 ros2 run grupo08_robot_kinematics ik_node
 ```
 Resultado esperado:
-[Demostración RViz2](docs/captura_cinematicainversa.png)
+[Cinematica_Inversa](docs/captura_cinematicainversa.png)
 
 4. Tópicos Utilizados:
 * ./joint_states (sensor_msgs/msg/JointState): Leído por fk_node para obtener la posición de las articulaciones, y publicado por ik_node para animar el robot en RViz
