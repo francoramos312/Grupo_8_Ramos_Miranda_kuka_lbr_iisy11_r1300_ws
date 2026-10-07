@@ -1,186 +1,99 @@
 #!/usr/bin/env python3
-from sympy import Matrix, symbols, cos, sin, pi
-from scipy.spatial.transform import Rotation as R
+
 import numpy as np
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
+from scipy.spatial.transform import Rotation as R
 
+# PARÁMETROS DH Y CINEMÁTICA DIRECTA (KUKA LBR iisy 11)
 
-# ============================================================
-# VARIABLES SIMBÓLICAS
-# ============================================================
+def dh(theta, d, a, alpha):
+    """
+    Matriz de transformación DH:
 
-t, d, a, alpha = symbols('theta d a alpha')
+    A = Rz(theta) * Tz(d) * Tx(a) * Rx(alpha)
+    """
 
-t1, t2, t3, t4, t5, t6 = symbols(
-    'theta_1 theta_2 theta_3 theta_4 theta_5 theta_6'
-)
+    ct, st = np.cos(theta), np.sin(theta)
+    ca, sa = np.cos(alpha), np.sin(alpha)
 
+    return np.array([
+        [ct, -st * ca,  st * sa, a * ct],
+        [st,  ct * ca, -ct * sa, a * st],
+        [0,   sa,       ca,       d],
+        [0,   0,        0,        1]
+    ], dtype=float)
 
-# ============================================================
-# MATRIZ DH GENÉRICA
-#
-# A = Rz(theta) * Tz(d) * Tx(a) * Rx(alpha)
-# ============================================================
-
-Rz = Matrix([
-    [cos(t), -sin(t), 0, 0],
-    [sin(t),  cos(t), 0, 0],
-    [0,      0,      1, 0],
-    [0,      0,      0, 1]
-])
-
-Tz = Matrix([
-    [1, 0, 0, 0],
-    [0, 1, 0, 0],
-    [0, 0, 1, d],
-    [0, 0, 0, 1]
-])
-
-Tx = Matrix([
-    [1, 0, 0, a],
-    [0, 1, 0, 0],
-    [0, 0, 1, 0],
-    [0, 0, 0, 1]
-])
-
-Rx = Matrix([
-    [1, 0,        0,       0],
-    [0, cos(alpha), -sin(alpha), 0],
-    [0, sin(alpha),  cos(alpha), 0],
-    [0, 0,        0,       1]
-])
-
-A = Rz * Tz * Tx * Rx
-
-
-# ============================================================
 # MATRICES DH DEL ROBOT
-# ============================================================
 
-# ------------------------------------------------------------
-# A01
-#
-# a1 = 0
-# alpha1 = -pi/2
-# d1 = 0.300
-# theta1 = -q1
-# ------------------------------------------------------------
+def get_fk_matrices(q):
 
-A01 = A.subs({
-    t: -t1,
-    d: 0.300,
-    a: 0,
-    alpha: -pi/2
-})
+    q1, q2, q3, q4, q5, q6 = q
 
+    A01 = dh(
+        -q1,
+        0.300,
+        0.0,
+        -np.pi / 2
+    )
 
-# ------------------------------------------------------------
-# A12
-#
-# a2 = 0.590
-# alpha2 = 0
-# d2 = -0.08925
-# theta2 = q2
-# ------------------------------------------------------------
+    A12 = dh(
+        q2,
+        -0.08925,
+        0.590,
+        0.0
+    )
 
-A12 = A.subs({
-    t: t2,
-    d: -0.08925,
-    a: 0.590,
-    alpha: 0
-})
+    A23 = dh(
+        q3 - np.pi / 2,
+        0.08925,
+        0.0,
+        np.pi / 2
+    )
 
+    A34 = dh(
+        q4 + np.pi,
+        -0.532,
+        0.0,
+        np.pi / 2
+    )
 
-# ------------------------------------------------------------
-# A23
-#
-# a3 = 0
-# alpha3 = +pi/2
-# d3 = +0.08925
-# theta3 = q3 - pi/2
-# ------------------------------------------------------------
+    A45 = dh(
+        q5 + np.pi,
+        0.0,
+        0.0,
+        np.pi / 2
+    )
 
-A23 = A.subs({
-    t: t3 - pi/2,
-    d: 0.08925,
-    a: 0,
-    alpha: pi/2
-})
+    A56 = dh(
+        q6,
+        -0.0837,
+        0.0,
+        0.0
+    )
 
+    At = np.array([
+        [-1,  0,  0,      0],
+        [ 0,  1,  0,      0],
+        [ 0,  0, -1, -0.0943],
+        [ 0,  0,  0,      1]
+    ], dtype=float)
 
-# ------------------------------------------------------------
-# A34
-#
-# a4 = 0
-# alpha4 = +pi/2
-# d4 = -0.532
-# theta4 = q4 + pi
-# ------------------------------------------------------------
+    return [A01, A12, A23, A34, A45, A56, At]
 
-A34 = A.subs({
-    t: t4 + pi,
-    d: -0.532,
-    a: 0,
-    alpha: pi/2
-})
+# CINEMÁTICA DIRECTA
 
+def fk(q):
 
-# ------------------------------------------------------------
-# A45
-#
-# a5 = 0
-# alpha5 = +pi/2
-# d5 = 0
-# theta5 = q5 + pi
-# ------------------------------------------------------------
+    matrices = get_fk_matrices(q)
 
-A45 = A.subs({
-    t: t5 + pi,
-    d: 0,
-    a: 0,
-    alpha: pi/2
-})
+    T = matrices[0]
 
+    for matrix in matrices[1:]:
+        T = T @ matrix
 
-# ------------------------------------------------------------
-# A56
-#
-# a6 = 0
-# alpha6 = 0
-# d6 = -0.0837
-# theta6 = q6
-# ------------------------------------------------------------
-
-A56 = A.subs({
-    t: t6,
-    d: -0.0837,
-    a: 0,
-    alpha: 0
-})
-
-
-# ============================================================
-# TRANSFORMACIÓN LINK_6 -> TOOL0
-#
-# Del XACRO:
-#
-# xyz = (0, 0, -0.0943)
-# rpy = (0, pi, 0)
-# ============================================================
-
-At = Matrix([
-    [-1, 0,  0, 0],
-    [ 0, 1,  0, 0],
-    [ 0, 0, -1, -0.0943],
-    [ 0, 0,  0, 1]
-])
-
-
-# ============================================================
-# NODO ROS2
-# ============================================================
+    return T
 
 class JointSubscriber(Node):
 
@@ -190,19 +103,33 @@ class JointSubscriber(Node):
 
         self.subscription = self.create_subscription(
             JointState,
-            'joint_states',
+            '/joint_states',
             self.sub_callback,
             10
         )
 
+        self.get_logger().info(
+            'Nodo de Cinemática Directa activo.'
+        )
 
     def sub_callback(self, msg):
 
-        # ====================================================
         # DATOS DE LAS ARTICULACIONES
-        # ====================================================
 
         joints = dict(zip(msg.name, msg.position))
+
+        if not all(
+            joint in joints
+            for joint in [
+                'joint_1',
+                'joint_2',
+                'joint_3',
+                'joint_4',
+                'joint_5',
+                'joint_6'
+            ]
+        ):
+            return
 
         j1 = joints['joint_1']
         j2 = joints['joint_2']
@@ -211,86 +138,56 @@ class JointSubscriber(Node):
         j5 = joints['joint_5']
         j6 = joints['joint_6']
 
+        # VECTOR DE ARTICULACIONES
 
-        # ====================================================
-        # TRANSFORMACIÓN TOTAL
-        #
-        # base -> link_6
-        # ====================================================
+        q = np.array([
+            j1,
+            j2,
+            j3,
+            j4,
+            j5,
+            j6
+        ], dtype=float)
 
-        T = A01 * A12 * A23 * A34 * A45 * A56
+        T = fk(q)
 
+        # POSICIÓN
 
-        # ====================================================
-        # TRANSFORMACIÓN link_6 -> tool0
-        # ====================================================
+        x = T[0, 3]
+        y = T[1, 3]
+        z = T[2, 3]
 
-        T_tool0 = T * At
+        # MATRIZ DE ROTACIÓN
 
+        rotation_matrix = T[0:3, 0:3]
 
-        # ====================================================
-        # SUSTITUIR LOS VALORES DE LAS ARTICULACIONES
-        # ====================================================
-
-        res = T_tool0.subs({
-            t1: j1,
-            t2: j2,
-            t3: j3,
-            t4: j4,
-            t5: j5,
-            t6: j6
-        })
-
-
-        # ====================================================
-        # CONVERTIR A NUMPY
-        # ====================================================
-
-        res_np = np.array(
-            res.evalf(),
-            dtype=float
-        )
-
-
-        # ====================================================
-        # EXTRAER ORIENTACIÓN
-        # ====================================================
+        # CONVERTIR ORIENTACIÓN A CUATERNIÓN
 
         rotation = R.from_matrix(
-            res_np[0:3, 0:3]
+            rotation_matrix
         )
 
         quaternion = rotation.as_quat()
 
-
-        # ====================================================
-        # MOSTRAR RESULTADO
-        # ====================================================
-
         print(
-            f"x:{res_np[0,3]:.3f} "
-            f"y:{res_np[1,3]:.3f} "
-            f"z:{res_np[2,3]:.3f} "
+            f"x:{x:.3f} "
+            f"y:{y:.3f} "
+            f"z:{z:.3f} "
             f"orientation:{quaternion}"
         )
-
-
-# ============================================================
-# MAIN
-# ============================================================
 
 def main(args=None):
 
     rclpy.init(args=args)
-
     node = JointSubscriber()
-
-    rclpy.spin(node)
-
-    node.destroy_node()
-
-    rclpy.shutdown()
-
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
