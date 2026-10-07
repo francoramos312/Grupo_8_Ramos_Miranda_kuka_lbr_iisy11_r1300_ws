@@ -71,6 +71,7 @@ Resultado esperado:
 
 5. Estructura del Repositorio
 
+```text
 Grupo_8_Ramos_Miranda_kuka_lbr_iisy11_r1300_ws/
 ├── .gitignore
 ├── README.md
@@ -95,5 +96,5 @@ Grupo_8_Ramos_Miranda_kuka_lbr_iisy11_r1300_ws/
     │   ├── package.xml
     │   ├── setup.cfg
     │   └── setup.py
-    └── kuka_robot_descriptions/          # Modelos URDF y mallas del robot
-
+    └── kuka_robot_descriptions/         
+```
