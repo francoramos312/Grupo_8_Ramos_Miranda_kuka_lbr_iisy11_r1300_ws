@@ -6,11 +6,11 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/rviz")
   install(DIRECTORY rviz DESTINATION share/${PROJECT_NAME})
 endif()
 install(PROGRAMS
-  pruebas/comprobacion.py
+  cinematicas/cinematica_directa.py
   DESTINATION lib/${PROJECT_NAME}
 )
 install(PROGRAMS
-  pruebas/intento.py
+  cinematicas/cinematica_inversa.py
   DESTINATION lib/${PROJECT_NAME}
 )
 ament_package()
