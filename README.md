@@ -29,5 +29,12 @@ cd Grupo_8_Ramos_Miranda_kuka_lbr_iisy11_r1300_ws
 chmod +x *.sh
 ./instalar.sh
 
+# 3. Carga del Entorno:
+source entorno.sh
+```
+## Comandos de ejecucion y Pruebas
+Visualización en RViz2::
+```bash
+ros2 launch grupo08_kuka_iisy11_bringup display.launch.py
+```
 
-    
