@@ -30,22 +30,35 @@ chmod +x *.sh
 ./instalar.sh
 
 # 3. Carga del Entorno:
+cd grupo_08_kuka_lbr_iisy11_r1300_ws/
+source install/setup.bash
 source entorno.sh
 ```
 ## Comandos de ejecucion y Pruebas
 1. Lanzar simulacion (Terminal 1):
 ```bash
-
 ros2 launch grupo08_kuka_iisy11_bringup display.launch.py
 ```
-Resultado esperado 
-![Demostración RViz2](docs/captura_rviz.png)
+Resultado esperado: 
+[Demostración RViz2](docs/captura_rviz.png)
 
 2. Ejecutar el nodo de Cinemática Directa (Terminal 2):
 ```bash
-
-colcon build
+#En la segunda terminal 
+cd grupo_08_kuka_lbr_iisy11_r1300_ws/
+source install/setup.bash
 ros2 run grupo08_robot_kinematics fk_node
 
 ```
-
+Resultado esperado:
+[Demostración RViz2](docs/captura_cinematicadirecta.png)
+3. Ejecutar el nodo de Cinemática Directa (Terminal 3):
+```bash
+#Antes de ejecutar el sugundo nodo se debe cerrar el nodo de cinematica directa 
+#En la tercera terminal 
+cd grupo_08_kuka_lbr_iisy11_r1300_ws/
+source install/setup.bash
+ros2 run grupo08_robot_kinematics ik_node
+```
+Resultado esperado:
+[Demostración RViz2](docs/captura_cinematicainversa.png)
