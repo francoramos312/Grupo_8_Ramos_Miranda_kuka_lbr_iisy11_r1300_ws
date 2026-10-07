@@ -63,3 +63,37 @@ ros2 run grupo08_robot_kinematics ik_node
 ```
 Resultado esperado:
 [Demostración RViz2](docs/captura_cinematicainversa.png)
+
+4. Tópicos Utilizados:
+* ./joint_states (sensor_msgs/msg/JointState): Leído por fk_node para obtener la posición de las articulaciones, y publicado por ik_node para animar el robot en RViz
+* ./target (geometry_msgs/msg/Point): Tópico donde se publican las coordenadas cartesianas $(X, Y, Z)$ deseadas
+* ./robot_description (std_msgs/msg/String): Publicado por robot_state_publisher para cargar el modelo URDF en RViz2.
+
+5. Estructura del Repositorio
+
+Grupo_8_Ramos_Miranda_kuka_lbr_iisy11_r1300_ws/
+├── .gitignore
+├── README.md
+├── abrir.sh
+├── dependencias.repos
+├── entorno.sh
+├── instalar.sh
+├── recompilar.sh
+├── requirements.txt
+├── verificar.sh
+└── src/
+    ├── grupo08_kuka_iisy11_bringup/      # Launch y configuración de RViz
+    │   ├── launch/
+    │   │   └── display.launch.py
+    │   ├── CMakeLists.txt
+    │   └── package.xml
+    ├── grupo08_robot_kinematics/         # Nodos Python de cinemática
+    │   ├── grupo08_robot_kinematics/
+    │   │   ├── __init__.py
+    │   │   ├── fk_node.py                # Ejecutable: ros2 run grupo08_robot_kinematics fk_node
+    │   │   └── ik_node.py                # Ejecutable: ros2 run grupo08_robot_kinematics ik_node
+    │   ├── package.xml
+    │   ├── setup.cfg
+    │   └── setup.py
+    └── kuka_robot_descriptions/          # Modelos URDF y mallas del robot
+
