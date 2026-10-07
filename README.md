@@ -33,8 +33,19 @@ chmod +x *.sh
 source entorno.sh
 ```
 ## Comandos de ejecucion y Pruebas
-Visualización en RViz2::
+1. Lanzar simulacion (Terminal 1):
 ```bash
+
 ros2 launch grupo08_kuka_iisy11_bringup display.launch.py
+```
+Resultado esperado 
+![Demostración RViz2](docs/captura_rviz.png)
+
+2. Ejecutar el nodo de Cinemática Directa (Terminal 2):
+```bash
+
+colcon build
+ros2 run grupo08_robot_kinematics fk_node
+
 ```
 
